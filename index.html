@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tarjeta Perforada IBM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;700&family=IBM+Plex+Sans+Condensed:wght@600;700&display=swap">
+<style>
+/* Layout: una columna de lectura; la tarjeta es la pieza central, a ancho completo con scroll propio */
+:root{
+  --bg:#E9ECEF; --surface:#F7F8F9; --fg:#1D2329; --muted:#5B6672; --line:#C9D0D6;
+  --card:#EFE3B8; --card-ink:#5A4A22; --card-edge:#CDBB80; --hole:#1D2329;
+  --accent:#2F5D8A; --zone:#B0452E; --ok:#2E7D4F;
+  --f-display:"IBM Plex Sans Condensed","Arial Narrow",sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#14191E; --surface:#1C232A; --fg:#E6EAEE; --muted:#9AA6B2; --line:#2F3A44;
+  --card:#E3D6A6; --card-ink:#5A4A22; --card-edge:#B9A66A; --hole:#0B0F12;
+  --accent:#7FAEDB; --zone:#E58A70; --ok:#6CC495; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#14191E; --surface:#1C232A; --fg:#E6EAEE; --muted:#9AA6B2; --line:#2F3A44;
+  --card:#E3D6A6; --card-ink:#5A4A22; --card-edge:#B9A66A; --hole:#0B0F12;
+  --accent:#7FAEDB; --zone:#E58A70; --ok:#6CC495; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:15px;line-height:1.55;padding-inline:16px;padding-block:28px 48px}
+main{max-width:1060px;margin:0 auto;display:grid;gap:28px}
+h1,h2{font-family:var(--f-display);text-wrap:balance;margin:0;line-height:1.15}
+h1{font-size:clamp(28px,5vw,40px)}
+h2{font-size:22px}
+p{margin:0;max-width:68ch}
+.eyebrow{font-family:var(--f-mono);font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+header{display:grid;gap:8px}
+.controls{display:flex;flex-wrap:wrap;gap:10px;align-items:end}
+.field{display:grid;gap:4px;flex:1 1 320px;min-width:0}
+label{font-size:13px;color:var(--muted)}
+input[type=text]{font-family:var(--f-mono);font-size:16px;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--fg);width:100%;text-transform:uppercase}
+input:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button{font-family:var(--f-body);font-size:14px;padding:10px 14px;border-radius:6px;border:1px solid var(--line);background:var(--surface);color:var(--fg);cursor:pointer}
+button:hover{border-color:var(--accent)}
+.counter{font-family:var(--f-mono);font-size:12px;color:var(--muted)}
+.cardwrap{overflow-x:auto;padding-block:4px 8px}
+svg#card{display:block;width:100%;min-width:820px;height:auto;user-select:none}
+.hint{font-size:13px;color:var(--muted)}
+.info{display:grid;grid-template-columns:auto 1fr;gap:6px 18px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:14px 16px;font-size:14px;align-items:baseline}
+.info .big{font-family:var(--f-mono);font-size:34px;font-weight:600;grid-row:span 3;line-height:1;color:var(--accent);min-width:1.4em;text-align:center}
+.info b{font-weight:600}
+.warn{color:var(--zone)}
+.explain{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
+.explain section{display:grid;gap:8px;align-content:start;min-width:0}
+.rows{font-family:var(--f-mono);font-size:13px;border-collapse:collapse}
+.rows td{padding:3px 10px 3px 0;border-bottom:1px solid var(--line)}
+.ref{display:grid;gap:14px}
+.grp h3{font-size:14px;margin:0 0 6px;font-weight:600}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{font-family:var(--f-mono);font-size:12.5px;border:1px solid var(--line);background:var(--surface);border-radius:4px;padding:4px 7px;cursor:pointer;color:var(--fg)}
+.chip strong{color:var(--accent);margin-right:6px;font-size:14px}
+.chip:hover{border-color:var(--accent)}
+code{font-family:var(--f-mono);font-size:.92em}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+
+<main>
+<header>
+  <span class="eyebrow">Código Hollerith · tarjeta IBM de 80 columnas</span>
+  <h1>Tarjeta perforada</h1>
+  <p>Cada columna de la tarjeta guarda un carácter. El carácter depende de qué combinación de filas tiene perforada. Escribe un texto para perforarlo, o haz clic en las posiciones de la tarjeta para perforar a mano y ver qué carácter resulta.</p>
+</header>
+
+<div class="controls">
+  <div class="field">
+    <label for="txt">Texto a perforar (máximo 80 caracteres)</label>
+    <input id="txt" type="text" maxlength="80" value="HOLA MUNDO 2026 - UNIBOYACA." autocomplete="off" spellcheck="false">
+  </div>
+  <button id="clear" type="button">Limpiar tarjeta</button>
+  <button id="sample" type="button">Ejemplo con todo el alfabeto</button>
+</div>
+<span class="counter" id="counter"></span>
+
+<div class="cardwrap"><svg id="card" viewBox="0 0 1000 330" role="img" aria-label="Tarjeta perforada de 80 columnas"></svg></div>
+<p class="hint">Pasa el cursor por una columna para ver su combinación. Haz clic en una posición para perforarla o taparla.</p>
+
+<div class="info" id="info" aria-live="polite"></div>
+
+<div class="explain">
+  <section>
+    <h2>Cómo está organizada</h2>
+    <p>La tarjeta tiene <b>80 columnas</b> (una por carácter) y <b>12 filas</b>. Las filas, de arriba hacia abajo, se llaman 12, 11, 0, 1, 2, 3, 4, 5, 6, 7, 8 y 9.</p>
+    <table class="rows">
+      <tr><td>12, 11, 0</td><td>Filas de <b>zona</b> (arriba)</td></tr>
+      <tr><td>0 a 9</td><td>Filas de <b>dígito</b></td></tr>
+    </table>
+    <p>La fila 0 hace doble trabajo: sola es el número cero y combinada con otra fila funciona como zona.</p>
+  </section>
+  <section>
+    <h2>Las combinaciones</h2>
+    <p><b>Números:</b> una sola perforación en su fila. El 7 es la fila 7.</p>
+    <p><b>Letras:</b> una zona más un dígito.</p>
+    <table class="rows">
+      <tr><td>A–I</td><td>zona 12 + 1 a 9</td></tr>
+      <tr><td>J–R</td><td>zona 11 + 1 a 9</td></tr>
+      <tr><td>S–Z</td><td>zona 0 + 2 a 9</td></tr>
+    </table>
+    <p><b>Símbolos:</b> casi todos añaden la fila 8 a la combinación (por ejemplo, el punto es 12-3-8). El espacio es una columna sin perforar.</p>
+  </section>
+  <section>
+    <h2>Cómo se leía</h2>
+    <p>La lectora pasaba la tarjeta por escobillas o fotoceldas. Donde había un hueco circulaba corriente o luz, y la máquina registraba un 1. Así cada columna se convertía en un patrón de 12 bits.</p>
+    <p>Por ejemplo, la <b>A</b> deja pasar señal solo en las filas 12 y 1. Ningún otro carácter tiene esa misma combinación, por eso no hay ambigüedad.</p>
+  </section>
+</div>
+
+<div class="ref">
+  <h2>Tabla de referencia</h2>
+  <p class="hint">Haz clic en un carácter para añadirlo al final del texto.</p>
+  <div id="ref"></div>
+</div>
+</main>
+
+<script>
+const ROWS=['12','11','0','1','2','3','4','5','6','7','8','9'];
+const CODE={' ':[]};
+'0123456789'.split('').forEach(d=>CODE[d]=[d]);
+'ABCDEFGHI'.split('').forEach((c,i)=>CODE[c]=['12',String(i+1)]);
+'JKLMNOPQR'.split('').forEach((c,i)=>CODE[c]=['11',String(i+1)]);
+'STUVWXYZ'.split('').forEach((c,i)=>CODE[c]=['0',String(i+2)]);
+Object.assign(CODE,{
+  '&':['12'],'-':['11'],'/':['0','1'],
+  '¢':['12','2','8'],'.':['12','3','8'],'<':['12','4','8'],'(':['12','5','8'],'+':['12','6','8'],'|':['12','7','8'],
+  '!':['11','2','8'],'$':['11','3','8'],'*':['11','4','8'],')':['11','5','8'],';':['11','6','8'],'¬':['11','7','8'],
+  ',':['0','3','8'],'%':['0','4','8'],'_':['0','5','8'],'>':['0','6','8'],'?':['0','7','8'],
+  ':':['2','8'],'#':['3','8'],'@':['4','8'],"'":['5','8'],'=':['6','8'],'"':['7','8']
+});
+const key=a=>ROWS.filter(r=>a.includes(r)).join('-');
+const DECODE={}; for(const [c,a] of Object.entries(CODE)) DECODE[key(a)]=c;
+
+let cols=Array.from({length:80},()=>new Set());
+let hover=-1;
+const svg=document.getElementById('card'), txt=document.getElementById('txt'), info=document.getElementById('info');
+const L=36, T=36, CW=11.75, RH=22;
+const NS='http://www.w3.org/2000/svg';
+const el=(n,a,t)=>{const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);if(t!=null)e.textContent=t;return e};
+
+function charOf(i){const k=key([...cols[i]]);return k in DECODE?DECODE[k]:null}
+function describe(c){
+  if(c===' ')return 'Columna en blanco: no lleva perforaciones.';
+  const a=CODE[c]; if(!a)return '';
+  if(/[0-9]/.test(c))return `Número: una sola perforación en la fila ${c}.`;
+  if(/[A-I]/.test(c))return `Letra del primer grupo (A–I): zona 12 + dígito ${a[1]}.`;
+  if(/[J-R]/.test(c))return `Letra del segundo grupo (J–R): zona 11 + dígito ${a[1]}.`;
+  if(/[S-Z]/.test(c))return `Letra del tercer grupo (S–Z): zona 0 + dígito ${a[1]}.`;
+  return `Símbolo especial: filas ${key(a)}.`;
+}
+
+function draw(){
+  svg.replaceChildren();
+  const css=getComputedStyle(document.documentElement);
+  const v=n=>css.getPropertyValue(n).trim();
+  const W=L*2+CW*80, H=T+RH*12+30;
+  svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  svg.append(el('path',{d:`M22 2 H${W-2} V${H-2} H2 V22 Z`,fill:v('--card'),stroke:v('--card-edge'),'stroke-width':1.5}));
+  // hover column band
+  if(hover>=0) svg.append(el('rect',{x:L+hover*CW,y:T-2,width:CW,height:RH*12+4,fill:v('--accent'),opacity:.18}));
+  // zone separator line
+  svg.append(el('line',{x1:L-6,x2:L+CW*80+6,y1:T+RH*2+1,y2:T+RH*2+1,stroke:v('--card-ink'),'stroke-width':.4,opacity:.5}));
+  // row labels
+  ROWS.forEach((r,ri)=>{
+    svg.append(el('text',{x:L-10,y:T+ri*RH+RH/2+4,'text-anchor':'end','font-family':'IBM Plex Mono, monospace','font-size':9,'font-weight':600,fill:ri<2?v('--zone'):v('--card-ink')},r));
+  });
+  for(let c=0;c<80;c++){
+    const x=L+c*CW;
+    const ch=charOf(c);
+    const printed=cols[c].size? (ch??'?') : '';
+    if(printed) svg.append(el('text',{x:x+CW/2,y:T-12,'text-anchor':'middle','font-family':'IBM Plex Mono, monospace','font-size':11,'font-weight':600,fill:ch==null?v('--zone'):v('--card-ink')},printed));
+    ROWS.forEach((r,ri)=>{
+      const y=T+ri*RH;
+      const g=el('g',{'data-c':c,'data-r':r,style:'cursor:pointer'});
+      g.append(el('rect',{x,y,width:CW,height:RH,fill:'transparent'}));
+      if(cols[c].has(r)) g.append(el('rect',{x:x+2.6,y:y+4,width:CW-5.2,height:RH-8,rx:1,fill:v('--hole')}));
+      else if(ri>=2) g.append(el('text',{x:x+CW/2,y:y+RH/2+3,'text-anchor':'middle','font-family':'IBM Plex Mono, monospace','font-size':8,fill:v('--card-ink'),opacity:.75},r));
+      svg.append(g);
+    });
+    if((c+1)%5===0||c===0) svg.append(el('text',{x:x+CW/2,y:T+RH*12+12,'text-anchor':'middle','font-family':'IBM Plex Mono, monospace','font-size':6.5,fill:v('--card-ink'),opacity:.8},c+1));
+  }
+  svg.append(el('text',{x:W-14,y:H-8,'text-anchor':'end','font-family':'IBM Plex Sans, sans-serif','font-size':8,fill:v('--card-ink'),opacity:.7},'80 COLUMNAS · 12 FILAS'));
+}
+
+function syncText(){
+  let s=''; for(let i=0;i<80;i++){const c=cols[i].size?(charOf(i)??'?'):' ';s+=c}
+  txt.value=s.replace(/\s+$/,'');
+  updateCounter();
+}
+function fromText(){
+  const s=txt.value.toUpperCase(); const bad=new Set();
+  cols=Array.from({length:80},()=>new Set());
+  [...s].slice(0,80).forEach((ch,i)=>{ if(CODE[ch]) CODE[ch].forEach(r=>cols[i].add(r)); else bad.add(ch)});
+  updateCounter(bad); draw(); showInfo(hover>=0?hover:0);
+}
+function updateCounter(bad){
+  const n=txt.value.length;
+  let m=`${n} de 80 columnas usadas`;
+  if(bad&&bad.size) m+=` · sin código en esta tarjeta: ${[...bad].join(' ')}`;
+  document.getElementById('counter').textContent=m;
+}
+function showInfo(i){
+  const set=cols[i]; const ch=charOf(i);
+  const rows=ROWS.filter(r=>set.has(r));
+  let big, desc;
+  if(!set.size){big='␣';desc='Columna en blanco: no lleva perforaciones (espacio).'}
+  else if(ch==null){big='?';desc='<span class="warn">Esta combinación no corresponde a ningún carácter del código IBM 029.</span>'}
+  else {big=ch;desc=describe(ch)}
+  info.innerHTML=`<div class="big">${big.replace(/</g,'&lt;')}</div>
+  <div><b>Columna ${i+1}</b></div>
+  <div>Filas perforadas: <code>${rows.length?rows.join(' · '):'ninguna'}</code></div>
+  <div>${desc}</div>`;
+}
+
+svg.addEventListener('mousemove',e=>{const g=e.target.closest('g[data-c]');if(!g)return;const c=+g.dataset.c;if(c!==hover){hover=c;draw();showInfo(c)}});
+svg.addEventListener('mouseleave',()=>{hover=-1;draw()});
+svg.addEventListener('click',e=>{const g=e.target.closest('g[data-c]');if(!g)return;const c=+g.dataset.c,r=g.dataset.r;
+  cols[c].has(r)?cols[c].delete(r):cols[c].add(r); hover=c; syncText(); draw(); showInfo(c)});
+txt.addEventListener('input',fromText);
+document.getElementById('clear').onclick=()=>{txt.value='';fromText();txt.focus()};
+document.getElementById('sample').onclick=()=>{txt.value='0123456789 ABCDEFGHIJKLMNOPQRSTUVWXYZ .,()+-*/=$#@%?:';fromText()};
+
+// reference table
+const groups=[
+  ['Números (una perforación)','0123456789'],
+  ['Letras A–I (zona 12)','ABCDEFGHI'],
+  ['Letras J–R (zona 11)','JKLMNOPQR'],
+  ['Letras S–Z (zona 0)','STUVWXYZ'],
+  ['Símbolos','&-/.<(+|!$*);,%_>?:#@\'="¢¬'],
+];
+const ref=document.getElementById('ref');
+groups.forEach(([t,chars])=>{
+  const d=document.createElement('div');d.className='grp';
+  d.innerHTML=`<h3>${t}</h3>`;
+  const w=document.createElement('div');w.className='chips';
+  [...chars].forEach(ch=>{const b=document.createElement('button');b.type='button';b.className='chip';
+    b.innerHTML=`<strong></strong>${key(CODE[ch])}`;b.firstChild.textContent=ch;
+    b.onclick=()=>{if(txt.value.length<80){txt.value+=ch;fromText();showInfo(txt.value.length-1)}};
+    w.append(b)});
+  d.append(w);ref.append(d);
+});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',draw);
+new MutationObserver(draw).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+fromText(); showInfo(0);
+</script>
+</body>
+</html>
