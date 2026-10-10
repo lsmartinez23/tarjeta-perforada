@@ -1,0 +1,23 @@
+{
+  "name": "tarjeta-perforada",
+  "version": "1.0.0",
+  "description": "Aplicacion Cliente/Servidor de tarjeta perforada",
+  "main": "server.js",
+  "bin": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "pkg": {
+    "assets": [
+      "index.html",
+      "public/**/*",
+      "src/**/*"
+    ],
+    "targets": [
+      "node18-win-x64"
+    ]
+  },
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}   
