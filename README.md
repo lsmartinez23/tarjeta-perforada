@@ -1,6 +1,6 @@
 Simulador interactivo de una tarjeta perforada IBM de 80 columnas con el código Hollerith.
 
-## Cómo funcionan las combinaciones
+Cómo funcionan las combinaciones
 
 | Caracteres | Combinación |
 |---|---|
